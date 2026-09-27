@@ -1,0 +1,30 @@
+name: Android APK yayini
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Expo APK dosyasini indir
+        env:
+          EXPO_APK_URL: https://expo.dev/artifacts/eas/gCOMIeuCOx1rUnkTf0y98xPoIAJfhaokD-MPHafbrXY.apk
+        run: |
+          curl --fail --location --retry 3 --retry-all-errors --output ANATOMIE-Kahve-Karti.apk "$EXPO_APK_URL"
+          test "$(stat -c%s ANATOMIE-Kahve-Karti.apk)" -gt 100000000
+          unzip -t ANATOMIE-Kahve-Karti.apk >/dev/null
+          sha256sum ANATOMIE-Kahve-Karti.apk
+      - name: Kalici GitHub surumunu yayinla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v1.0.0 ANATOMIE-Kahve-Karti.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "ANATOMIE Kahve Karti Android v1.0.0" \
+            --notes "ANATOMIE Coffee & Bakery Android uygulamasinin kurulum dosyasi." \
+            --latest
